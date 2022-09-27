@@ -64,7 +64,7 @@ morgan.token('body',  (req, res) => { return JSON.stringify(req.body)})
 
 app.use(morgan(':method :url :response-time :body'))
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if(body.name === undefined || body.number === undefined )
@@ -75,9 +75,11 @@ app.post('/api/persons', (request, response) => {
     number: body.number,
   })
 
-  person.save().then(savePerson => {
-    response.json(savePerson)
-  })
+  person.save()
+    .then(savePerson => {
+      response.json(savePerson)
+    })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -88,7 +90,10 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: body.number, 
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(
+    request.params.id, 
+    person,
+    { new: true, runValidators: true, context: 'query' })
     .then(updatePerson => {
       response.json(updatePerson)
     })
@@ -101,6 +106,8 @@ const errorHandler = (error, request, response, next) => {
   if(error.name === 'CastError')
   {
     return response.status(400).send({error: 'malformatted id'})
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
   
   next(error)
