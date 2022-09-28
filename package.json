@@ -10,11 +10,13 @@
     "build:ui": "shx rm -rf build && cd ../fullstackopen/part2/phonebook && npm run build && shx cp -r build ../../../Phonebook_backend",
     "deploy": "git push heroku main",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
-    "logs:prod": "heroku logs --tail"
+    "logs:prod": "heroku logs --tail",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^8.24.0",
     "nodemon": "^2.0.20"
   },
   "dependencies": {
